@@ -1,0 +1,200 @@
+	<!doctype html>
+	<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width,initial-scale=1" />
+		<title>Confirm children — shambhavi'swami</title>
+		<style>
+			/* Background: put your background image at images/children_bg.jpg inside the workspace for best portability.
+			   If that file isn't present, the page will try the local Downloads path you provided.
+			*/
+			body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin:0; color:#111; min-height:100vh; background-color:#111; background-size:cover; background-position:center; background-repeat:no-repeat; background-attachment:fixed }
+			/* overlay gradient will be combined with the background image by JS */
+			/* smaller card and left-aligned on wide screens; centered on small screens */
+			.card { max-width:420px; margin:48px 0 48px 40px; padding:18px; border-radius:10px; box-shadow:0 10px 30px rgba(0,0,0,0.45); background:rgba(255,255,255,0.92); backdrop-filter: blur(4px) saturate(120%) }
+			@media (max-width:600px){
+				.card { max-width:92%; margin:32px auto; padding:16px }
+			}
+			h1 { margin-top:0; font-size:1.4rem }
+			@media (max-width:480px){
+				.card{ margin:18px auto;padding:14px;border-radius:10px }
+				h1{font-size:1.2rem}
+				input.input{padding:10px;font-size:1rem}
+				.actions button{padding:10px 14px;border-radius:10px}
+			}
+			.input { padding:8px; width:100%; box-sizing:border-box }
+			.msg { margin-top:16px; padding:12px; border-radius:6px; background:#f3f9ff; border:1px solid #dbefff }
+				.error { background:#fff4f4; border:1px solid #ffd6d6 }
+				/* dreamy visuals */
+				:root{--accent:#ff66c4;--accent-2:#0ea5e9;--dreamy-glow: 0 10px 40px rgba(158, 93, 255, 0.12)}
+				.dreamy-overlay{position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(ellipse at 30% 20%, rgba(255,220,245,0.06), transparent 20%), radial-gradient(ellipse at 80% 80%, rgba(160,230,255,0.04), transparent 25%)}
+				.sparkle{position:fixed;border-radius:50%;pointer-events:none;z-index:1400;mix-blend-mode:screen;opacity:0;transform:scale(0.6)}
+				@keyframes sparkleAnim{0%{opacity:0;transform:scale(0.6) translateY(0)}10%{opacity:1;transform:scale(1.1) translateY(-6px)}70%{opacity:0.8;transform:scale(0.9) translateY(-2px)}100%{opacity:0;transform:scale(0.6) translateY(0)}}
+				.dance{animation:danceAnim .9s cubic-bezier(.2,.9,.3,1)}
+				@keyframes danceAnim{0%{transform:translateY(0) rotate(0) scale(1)}20%{transform:translateY(-6px) rotate(-3deg) scale(1.02)}50%{transform:translateY(4px) rotate(3deg) scale(0.99)}100%{transform:translateY(0) rotate(0) scale(1)}}
+			.actions { margin-top:12px; display:flex; gap:8px }
+			.small { color:#666 }
+		</style>
+	</head>
+	<body>
+		<div class="card">
+			<h1>Confirm your children</h1>
+			<p class="small">Please enter the names of your three children to confirm you're shambhavi'swami.</p>
+
+			<form id="childrenForm">
+				<input id="child1" name="child1" class="input" type="text" placeholder="Child 1 name" value="">
+				<input id="child2" name="child2" class="input" type="text" placeholder="Child 2 name" value="" style="margin-top:8px">
+				<input id="child3" name="child3" class="input" type="text" placeholder="Child 3 name" value="" style="margin-top:8px">
+
+				<div class="actions">
+					<button type="submit">Verify</button>
+					<button type="button" id="backBtn">Back</button>
+				</div>
+			</form>
+
+			<div id="result" class="msg" style="display:none"></div>
+		</div>
+
+		<script>
+			(function(){
+				// Try to load a background image. Recommended: copy the attached image into
+				// the workspace at images/children_bg.jpg. If not found, fallback to the full
+				// Downloads path you provided (encoded).
+				const tryUrls = [
+					'images/children_bg.jpg',
+					'file:///Users/shambhavisingh/Downloads/WhatsApp%20Image%202025-11-22%20at%2022.36.39.jpeg'
+				];
+
+				function applyBackground(url){
+					// use a light semi-transparent gradient on top of the image (no overlay blend)
+					document.body.style.backgroundImage = 'linear-gradient(rgba(0,0,0,0.18), rgba(0,0,0,0.18)), url("'+url+'")';
+					document.body.style.backgroundSize = 'cover';
+					document.body.style.backgroundPosition = 'center';
+					document.body.style.backgroundRepeat = 'no-repeat';
+					// remove any blend mode so the image itself remains visible
+					document.body.style.backgroundBlendMode = '';
+				}
+
+				function tryLoadBg(urls, i){
+					if(i>=urls.length) return;
+					const img = new Image();
+					img.onload = function(){ applyBackground(urls[i]); };
+					img.onerror = function(){ tryLoadBg(urls, i+1); };
+					img.src = urls[i];
+				}
+
+				tryLoadBg(tryUrls, 0);
+			
+				const form = document.getElementById('childrenForm');
+				const backBtn = document.getElementById('backBtn');
+				const result = document.getElementById('result');
+				const child1 = document.getElementById('child1');
+				const child2 = document.getElementById('child2');
+				const child3 = document.getElementById('child3');
+
+				function showResult(text, isError){
+					result.textContent = text;
+					result.style.display = 'block';
+					if(isError){ result.classList.add('error') } else { result.classList.remove('error') }
+				}
+
+				form.addEventListener('submit', function(e){
+					e.preventDefault();
+					// normalize helper: remove non-letters and lowercase
+					const normalize = s => (s||'').toLowerCase().replace(/[^a-z]/g,'');
+					const n1 = normalize(child1.value);
+					const n2 = normalize(child2.value);
+					const n3 = normalize(child3.value);
+
+					// allowed variants for each child (lowercased, alphabetic only)
+					const variants = [
+						['gori','gouri','gauri'],
+						['karu','karoo','karun','karuna'],
+						['tikki','tiki','ticky','tikky','tikka']
+					];
+
+					const inputs = [n1,n2,n3];
+					const used = new Set();
+
+					for(const inp of inputs){
+						if(!inp) continue;
+						let found = false;
+						for(let i=0;i<variants.length;i++){
+							if(used.has(i)) continue; // each expected child must match a unique input
+							if(variants[i].includes(inp)){
+								used.add(i);
+								found = true;
+								break;
+							}
+						}
+						// if not found, try a loose match: startsWith first 2 letters
+						if(!found){
+							for(let i=0;i<variants.length;i++){
+								if(used.has(i)) continue;
+								for(const v of variants[i]){
+									if(v.startsWith(inp) || inp.startsWith(v) || (v.slice(0,2) === inp.slice(0,2))){
+										used.add(i);
+										found = true;
+										break;
+									}
+								}
+								if(found) break;
+							}
+						}
+					}
+
+					if(used.size === variants.length){
+						// Redirect to the dashboard page with a name parameter
+						const name = 'Mrityunjay';
+						window.location.href = 'dashboard.html?name=' + encodeURIComponent(name);
+					} else {
+						showResult("dont even know your children name😒", true);
+					}
+				});
+
+				backBtn.addEventListener('click', function(){
+					window.location.href = 'front_page.htm';
+				});
+
+				// dreamy overlay, sparkles and small confetti burst
+				(function enhanceVisuals(){
+					try{
+						function createSparkles(){
+							const isMobile = window.innerWidth <= 480;
+							const count = isMobile ? 12 : 28;
+							for(let i=0;i<count;i++){
+								const s = document.createElement('div'); s.className='sparkle';
+								s.style.left = (Math.random()*100)+'%'; s.style.top = (Math.random()*100)+'%';
+								const size = (isMobile?2:3) + Math.floor(Math.random()*(isMobile?8:14));
+								s.style.width = size+'px'; s.style.height = size+'px';
+								const hue = 280 + Math.floor(Math.random()*120);
+								s.style.background = 'radial-gradient(circle at 30% 30%, rgba(255,255,255,0.95), hsla('+hue+',90%,65%,0.85) 40%, transparent 60%)';
+								s.style.opacity = (Math.random()*0.7 + 0.25).toFixed(2);
+								const delay = Math.random()*(isMobile?2:3); const dur = (isMobile?1.5:2) + Math.random()*2;
+								s.style.animation = 'sparkleAnim '+dur+'s '+delay+'s infinite';
+								document.body.appendChild(s);
+							}
+						}
+
+						function startConfettiChildren(opts){
+							opts = opts || {}; const big = !!opts.big; const count = big?200:80; const duration = big?7000:4500;
+							const canvas = document.createElement('canvas'); canvas.style.position='fixed'; canvas.style.left=0; canvas.style.top=0; canvas.style.zIndex=2500; canvas.style.pointerEvents='none'; document.body.appendChild(canvas);
+							const ctx = canvas.getContext('2d'); function resize(){ canvas.width = window.innerWidth; canvas.height = window.innerHeight; } resize(); window.addEventListener('resize', resize);
+							const pieces=[]; const colors=['#ff7ab6','#ffd166','#a0f0d1','#96bbff','#caa1ff'];
+							for(let i=0;i<count;i++){ pieces.push({x:Math.random()*canvas.width,y:Math.random()*-canvas.height,vx:(Math.random()-0.5)*6,vy:Math.random()*5+1,col:colors[Math.floor(Math.random()*colors.length)],r:Math.random()*8+3,rot:Math.random()*6.28,vr:(Math.random()-0.5)*0.16}); }
+							let raf, start=null; function step(ts){ if(!start) start=ts; const elapsed = ts-start; ctx.clearRect(0,0,canvas.width,canvas.height); for(const p of pieces){ p.x+=p.vx; p.y+=p.vy; p.vy+=0.04; p.rot+=p.vr; ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot); ctx.fillStyle=p.col; ctx.fillRect(-p.r/2,-p.r/2,p.r,p.r*0.6); ctx.restore(); } if(elapsed < duration) raf=requestAnimationFrame(step); else { cancelAnimationFrame(raf); try{ canvas.parentNode.removeChild(canvas); }catch(e){} } } requestAnimationFrame(step);
+						}
+
+						// append overlay and sparkles
+						const overlay = document.createElement('div'); overlay.className='dreamy-overlay'; document.body.appendChild(overlay);
+						createSparkles();
+						if(window.innerWidth > 480) setTimeout(()=> startConfettiChildren({big:false}), 420);
+
+						// make buttons dance briefly on click
+						Array.from(document.querySelectorAll('button')).forEach(btn=> btn.addEventListener('click', ()=>{ btn.classList.add('dance'); setTimeout(()=> btn.classList.remove('dance'), 900); }));
+					}catch(e){}
+				})();
+			})();
+		</script>
+	</body>
+	</html>

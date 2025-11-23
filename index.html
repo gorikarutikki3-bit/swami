@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width,initial-scale=1" />
+		<title>Authentication — Who are you?</title>
+		<style>
+			:root{--accent:#ff66c4;--accent-2:#0ea5e9;--dreamy-glow: 0 10px 40px rgba(158, 93, 255, 0.12)}
+			body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin:0; color:#111; min-height:100vh; background-color:#000; background-size:cover; background-position:center; background-repeat:no-repeat; background-attachment:fixed }
+				/* Desktop: position card bottom-right so background photo is visible; Mobile: center it */
+				.card { max-width:520px; padding:18px; border-radius:8px; box-shadow:var(--dreamy-glow); background:linear-gradient(180deg, rgba(255,255,255,0.96), rgba(250,250,255,0.9)); position:fixed; right:20px; bottom:20px; width:360px; z-index:1200 }
+				@media (max-width:900px){ .card{ width:320px } }
+				@media (max-width:600px){ .card{ position:static; margin:32px auto; max-width:92%; padding:16px } }
+			h1 { margin-top:0; font-size:1.4rem }
+			.options { margin:16px 0 }
+			.option { display:block; margin:8px 0 }
+			.msg { margin-top:16px; padding:12px; border-radius:6px; background:#f3f9ff; border:1px solid #dbefff }
+			.error { background:#fff4f4; border:1px solid #ffd6d6 }
+			.hidden { display:none }
+			button { background:#0366d6; color:white; border:none; padding:10px 14px; border-radius:6px; cursor:pointer }
+			button[disabled]{ opacity:0.6; cursor:default }
+			.hint { color:#666; font-size:0.9rem }
+			.actions { margin-top:12px; display:flex; gap:8px }
+
+			/* dreamy overlay + sparkles */
+			.dreamy-overlay{position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(ellipse at 30% 20%, rgba(255,220,245,0.06), transparent 20%), radial-gradient(ellipse at 80% 80%, rgba(160,230,255,0.04), transparent 25%)}
+			.sparkle{position:fixed;border-radius:50%;pointer-events:none;z-index:1400;mix-blend-mode:screen;opacity:0;transform:scale(0.6)}
+			@keyframes sparkleAnim{0%{opacity:0;transform:scale(0.6) translateY(0)}10%{opacity:1;transform:scale(1.1) translateY(-6px)}70%{opacity:0.8;transform:scale(0.9) translateY(-2px)}100%{opacity:0;transform:scale(0.6) translateY(0)}}
+
+			/* dancing (selection) animation for tabs / buttons */
+			.dance{animation:danceAnim .9s cubic-bezier(.2,.9,.3,1)}
+			@keyframes danceAnim{0%{transform:translateY(0) rotate(0) scale(1)}20%{transform:translateY(-6px) rotate(-3deg) scale(1.02)}50%{transform:translateY(4px) rotate(3deg) scale(0.99)}100%{transform:translateY(0) rotate(0) scale(1)}}
+		</style>
+	</head>
+	<body>
+		<div class="card">
+			<h1>Authentication</h1>
+			<p class="hint">Please tell us: "Who are you?"</p>
+
+			<form id="authForm">
+				<fieldset class="options" aria-labelledby="whoLabel">
+					<legend id="whoLabel">Who are you?</legend>
+					<label class="option"><input type="radio" name="identity" value="shambhavi'swami"> shambhavi'swami</label>
+					<label class="option"><input type="radio" name="identity" value="shambhavi's friend"> shambhavi's friend</label>
+					<label class="option"><input type="radio" name="identity" value="gpt sahab"> gpt sahab</label>
+				</fieldset>
+
+				<div class="actions">
+					<button type="submit" id="submitBtn">Continue</button>
+					<button type="button" id="resetBtn">Reset</button>
+				</div>
+			</form>
+
+			<div id="result" class="msg hidden"></div>
+		</div>
+
+		<script>
+			(function(){
+				// Try to set front page background image (relative path preferred)
+				const frontBgCandidates = [
+					'images/front_bg.jpg',
+					'file:///Users/shambhavisingh/Downloads/WhatsApp%20Image%202025-11-22%20at%2023.09.36.jpeg'
+				];
+				(function trySetBg(urls, i){
+					if(i>=urls.length) return;
+					const img = new Image();
+					img.onload = function(){ document.body.style.backgroundImage = 'linear-gradient(rgba(0,0,0,0.12), rgba(0,0,0,0.12)), url("'+urls[i]+'")'; };
+					img.onerror = function(){ trySetBg(urls, i+1); };
+					img.src = urls[i];
+				})(frontBgCandidates,0);
+				const form = document.getElementById('authForm');
+				const result = document.getElementById('result');
+				const submitBtn = document.getElementById('submitBtn');
+				const resetBtn = document.getElementById('resetBtn');
+
+				// make option labels 'dance' briefly on click to show selection
+				Array.from(document.querySelectorAll('.option')).forEach(lbl => {
+					lbl.addEventListener('click', function(){
+						lbl.classList.add('dance');
+						setTimeout(()=> lbl.classList.remove('dance'), 900);
+					});
+				});
+
+				// Clear result on change
+				form.addEventListener('change', function(){
+					result.classList.add('hidden');
+				});
+
+				function showResult(text, isError){
+					result.textContent = text;
+					result.classList.remove('hidden');
+					if(isError){
+						result.classList.add('error');
+					} else {
+						result.classList.remove('error');
+					}
+				}
+
+				// Submit: redirect swami to children page; other options show try-again
+				form.addEventListener('submit', function(e){
+					e.preventDefault();
+					const data = new FormData(form);
+					const id = data.get('identity');
+
+					if(!id){
+						showResult('Please choose one of the options.', true);
+						return;
+					}
+
+					if(id === "shambhavi'swami"){
+						// go to separate page to enter the three children names
+						window.location.href = 'children_page.htm?identity=' + encodeURIComponent(id);
+					} else {
+						showResult('try again she thinks you are more than that', true);
+					}
+				});
+
+				resetBtn.addEventListener('click', function(){
+					form.reset();
+					result.classList.add('hidden');
+				});
+
+				// ----- dreamy sparkles + confetti (small burst) -----
+				function createSparkles(){
+					try{
+						const count = 28;
+						for(let i=0;i<count;i++){
+							const s = document.createElement('div');
+							s.className = 'sparkle';
+							s.style.left = (Math.random()*100) + '%';
+							s.style.top = (Math.random()*100) + '%';
+							const size = 3 + Math.floor(Math.random()*14);
+							s.style.width = size + 'px'; s.style.height = size + 'px';
+							const hue = 280 + Math.floor(Math.random()*120);
+							s.style.background = 'radial-gradient(circle at 30% 30%, rgba(255,255,255,0.95), hsla('+hue+',90%,65%,0.85) 40%, transparent 60%)';
+							s.style.opacity = (Math.random()*0.8 + 0.2).toFixed(2);
+							const delay = Math.random()*3;
+							const dur = 2 + Math.random()*3;
+							s.style.animation = 'sparkleAnim '+dur+'s '+delay+'s infinite';
+							document.body.appendChild(s);
+						}
+					}catch(e){}
+				}
+
+				function startConfettiFront(opts){
+					opts = opts || {}; const big = !!opts.big; const count = big ? 220 : 90; const duration = big ? 7000 : 4500;
+					const canvas = document.createElement('canvas'); canvas.style.position='fixed'; canvas.style.left=0; canvas.style.top=0; canvas.style.zIndex=2500; canvas.style.pointerEvents='none'; document.body.appendChild(canvas);
+					const ctx = canvas.getContext('2d'); function resize(){ canvas.width = window.innerWidth; canvas.height = window.innerHeight; } resize(); window.addEventListener('resize', resize);
+					const pieces=[]; const colors=['#ff7ab6','#ffd166','#a0f0d1','#96bbff','#caa1ff'];
+					for(let i=0;i<count;i++){ pieces.push({x:Math.random()*canvas.width,y:Math.random()*-canvas.height,vx:(Math.random()-0.5)*6,vy:Math.random()*5+1,col:colors[Math.floor(Math.random()*colors.length)],r:Math.random()*8+3,rot:Math.random()*6.28,vr:(Math.random()-0.5)*0.16}); }
+					let raf, start=null; function step(ts){ if(!start) start=ts; const elapsed = ts-start; ctx.clearRect(0,0,canvas.width,canvas.height); for(const p of pieces){ p.x+=p.vx; p.y+=p.vy; p.vy+=0.04; p.rot+=p.vr; ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot); ctx.fillStyle=p.col; ctx.fillRect(-p.r/2,-p.r/2,p.r,p.r*0.6); ctx.restore(); } if(elapsed < duration) raf=requestAnimationFrame(step); else { cancelAnimationFrame(raf); try{ canvas.parentNode.removeChild(canvas); }catch(e){} } } requestAnimationFrame(step);
+				}
+
+				// append dreamy overlay element
+				const overlay = document.createElement('div'); overlay.className = 'dreamy-overlay'; document.body.appendChild(overlay);
+				createSparkles();
+				setTimeout(()=> startConfettiFront({big:false}), 420);
+			})();
+		</script>
+	</body>
+</html>

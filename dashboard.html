@@ -1,0 +1,796 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Dashboard — Welcome</title>
+  <style>
+  :root{--accent:#ff66c4;--accent-2:#0ea5e9;--glass: rgba(255,255,255,0.06);--glass-2: rgba(255,255,255,0.08);--muted: rgba(255,255,255,0.85);--dreamy-glow: 0 10px 40px rgba(158, 93, 255, 0.12)}
+
+     body{font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin:0; min-height:100vh; color:#fff; background-color:#071126; display:flex; align-items:flex-start; justify-content:center; padding-top:36px;}
+
+     /* Glass panel with soft gradient and gentle glow */
+     .panel{max-width:920px; width:92%; background: linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02)); padding:20px; border-radius:14px; box-shadow:0 12px 40px rgba(2,6,23,0.6), 0 2px 8px rgba(14,165,233,0.06); border:1px solid var(--glass-2); color:#fff; backdrop-filter: blur(6px); position:relative; overflow:visible}
+
+    /* background image as an <img> so we can control object-position/scale to reveal the face */
+  /* show entire image (zoomed out) so full picture is visible on load */
+  #bgImg{position:fixed;inset:0;width:100%;height:100%;object-fit:contain;object-position:center center;transform:none;filter:brightness(0.94);background-color:#071126;z-index: -2}
+    .bgOverlay{position:fixed;inset:0;z-index:-1;background:linear-gradient(rgba(5,10,20,0.45), rgba(5,10,20,0.45));}
+
+    .panel{max-width:920px; width:92%; background:rgba(255,255,255,0.06); padding:18px; border-radius:12px; box-shadow:0 10px 40px rgba(2,6,23,0.6); border:1px solid rgba(255,255,255,0.04); color:#fff}
+    h1{margin:0 0 6px 0; font-size:1.8rem}
+    p.lead{margin:10px 0 0 0; font-size:1.05rem; line-height:1.6}
+    .emoji{font-size:1.4rem}
+    .small{margin-top:12px;font-size:0.95rem;color:rgba(255,255,255,0.85)}
+
+    /* Tabs */
+    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+    .tab{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:8px 12px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);cursor:pointer;color:var(--muted);box-shadow:0 6px 18px rgba(2,6,23,0.35);transition:transform .18s ease,box-shadow .18s ease}
+    .tab:hover{transform:translateY(-3px);box-shadow:0 10px 26px rgba(14,165,233,0.08)}
+    .tab.active{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#041024;font-weight:700;border:none;box-shadow:0 10px 30px rgba(14,165,233,0.14)}
+    .content-area{background:rgba(0,0,0,0.25);padding:14px;border-radius:10px;min-height:140px}
+  .content-area{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.18));padding:16px;border-radius:12px;min-height:140px}
+  /* Hide all content panels by default; show only the one with .active */
+  .content-area > div{display:none}
+  .content-area > div.active{display:block}
+    .gallery img{max-width:160px;border-radius:12px;margin-right:10px;margin-bottom:10px;box-shadow:0 12px 30px rgba(2,6,23,0.5);transition:transform .22s ease,filter .22s ease;cursor:pointer;border:1px solid rgba(255,255,255,0.04)}
+    .gallery img:hover{transform:translateY(-6px) scale(1.04);filter:saturate(1.06) drop-shadow(0 12px 26px rgba(14,165,233,0.06))}
+  /* Lightbox / fullscreen gallery */
+  #lightbox{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.95);z-index:2000}
+  #lightbox.active{display:flex}
+  #lightbox img{max-width:95%;max-height:90%;border-radius:8px;box-shadow:0 20px 60px rgba(0,0,0,0.6)}
+  .lightbox-controls{position:fixed;left:50%;transform:translateX(-50%);bottom:28px;display:flex;gap:12px;z-index:2010}
+  .lightbox-controls button{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:#fff;padding:8px 12px;border-radius:8px;cursor:pointer}
+  .lightbox-side{position:fixed;top:50%;transform:translateY(-50%);z-index:2010}
+  .lightbox-side.left{left:14px}
+  .lightbox-side.right{right:14px}
+  .lb-side-btn{background:transparent;border:none;color:#fff;font-size:2rem;cursor:pointer;padding:8px 12px}
+  /* Month calendar (single month view) */
+  .monthNav{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+  .monthNav button{background:linear-gradient(90deg,var(--accent),var(--accent-2));border:none;color:#041024;padding:7px 12px;border-radius:8px;cursor:pointer;box-shadow:0 10px 26px rgba(14,165,233,0.08)}
+  #monthCal{background:rgba(255,255,255,0.03);padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.02)}
+  #monthCal h4{margin:0 0 6px 0;font-size:0.95rem}
+  #monthCal .days{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;font-size:0.95rem}
+  .day{padding:8px;border-radius:6px;text-align:center;color:rgba(255,255,255,0.95);background:transparent}
+  .day.empty{background:transparent;color:transparent}
+  .day.highlight{background:#0ea5e9;color:#012;font-weight:700;box-shadow:0 6px 14px rgba(14,165,233,0.12);cursor:pointer}
+  .cal-legend{margin-top:8px;font-size:0.85rem;color:rgba(255,255,255,0.85)}
+    @media(max-width:700px){ body{padding-top:12px} .panel{width:96%;} }
+  /* glittery sparkle dots */
+  .sparkle{position:fixed;border-radius:50%;pointer-events:none;z-index:1400;mix-blend-mode:screen;opacity:0;transform:scale(0.6)}
+  @keyframes sparkleAnim{0%{opacity:0;transform:scale(0.6) translateY(0)}10%{opacity:1;transform:scale(1.1) translateY(-6px)}70%{opacity:0.8;transform:scale(0.9) translateY(-2px)}100%{opacity:0;transform:scale(0.6) translateY(0)}}
+
+  /* dreamy glow and soft vignette */
+  .dreamy-overlay{position:fixed;inset:0;pointer-events:none;z-index:-1;background:radial-gradient(ellipse at 30% 20%, rgba(255,220,245,0.06), transparent 20%), radial-gradient(ellipse at 80% 80%, rgba(160,230,255,0.04), transparent 25%)}
+
+  /* dancing (selection) animation for tabs / buttons */
+  .dance{animation:danceAnim .9s cubic-bezier(.2,.9,.3,1)}
+  @keyframes danceAnim{0%{transform:translateY(0) rotate(0) scale(1)}20%{transform:translateY(-6px) rotate(-3deg) scale(1.02)}50%{transform:translateY(4px) rotate(3deg) scale(0.99)}100%{transform:translateY(0) rotate(0) scale(1)}}
+
+    /* heading shimmer */
+    h1{margin:0 0 6px 0; font-size:1.8rem; position:relative; overflow:visible}
+    h1::after{content:'';position:absolute;left:-40%;top:0;width:30%;height:100%;background:linear-gradient(90deg, rgba(255,255,255,0.0), rgba(255,255,255,0.35), rgba(255,255,255,0.0));transform:skewX(-20deg);animation:shine 3.6s linear infinite}
+    @keyframes shine{0%{left:-40%}100%{left:120%}}
+  </style>
+</head>
+<body>
+  <div class="panel">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px">
+      <div>
+        <h1 id="title">Welcome!</h1>
+        <div class="small" id="subtitle">Here's your dashboard</div>
+      </div>
+      <div style="text-align:right;color:rgba(255,255,255,0.8)">
+        <div id="dateNow"></div>
+      </div>
+    </div>
+
+      <div class="tabs" role="tablist">
+      <div class="tab active" data-tab="home">Home</div>
+      <div class="tab" data-tab="wishes">Wishes</div>
+      <div class="tab" data-tab="shayari">Shayari</div>
+      <div class="tab" data-tab="memories">Memories</div>
+      <div class="tab" data-tab="gallery">Gallery</div>
+      <div class="tab" data-tab="improvements">Improvements</div>
+      <div class="tab" data-tab="guess">Guess What</div>
+    </div>
+
+    <div class="content-area">
+      <div id="home" class="active">
+        <div class="monthNav">
+          <button id="calPrev">&lt;</button>
+          <div id="monthTitle" style="font-weight:600"></div>
+          <button id="calNext">&gt;</button>
+        </div>
+        <div id="monthCal"></div>
+        <div class="cal-legend">* you know the highlighted date is the most special day in my favourite person's life so click it to know about the date
+
+        </div>
+      </div>
+
+      <div id="wishes">
+        <p class="lead" id="message"></p>
+        <div style="display:flex;justify-content:flex-end;margin-top:12px">
+          <button id="nextWish" title="Next wish" style="padding:6px 10px;border-radius:6px;border:none;background:#0ea5e9;color:#fff;cursor:pointer">&gt;</button>
+        </div>
+      </div>
+      <div id="shayari">
+        <p id="shayariText" style="margin:0;color:rgba(255,255,255,0.9)"></p>
+        <div style="display:flex;justify-content:flex-end;margin-top:12px">
+          <button id="nextShayari" title="Next shayari" style="padding:6px 10px;border-radius:6px;border:none;background:#0ea5e9;color:#fff;cursor:pointer">&gt;</button>
+        </div>
+      </div>
+      <div id="memories">
+        <p style="margin:0;color:rgba(255,255,255,0.95);white-space:pre-wrap;line-height:1.5">u know what i never had accepted any message request on insta earlier bt it was your charm or should i say my lucky night😉 that i accepted your request on that night then for almost 2 hrs you just replied to my each and every highlight with your best flirty lines andi thought of u as some creep really the way u commented on each pic 😂😭 bt your charms even then worked after every 5 to 10 mins of talking to u i was grinning and reading out loud the compliment you would have given me then our talking grew and as time passed our bond grew stronger atleast from my side then that day when i posted 'send me an anonymous mssage and all your messages were too funny and humourous bt that one message became our title like the swami😭 and u know i never have got someone withis much personality match with me and then our bond just grew and grew and on my birthday the things u did for me made me really so much attached to u like how can someone do this much for me bt see here i am writing a whole essay on how our bond grew and grew and declined and again grew🤓                     just women things and that tooo one with khiske dimag wali SHAMBHAVI 😂       haha very funny bt u know after that birthday part something overtook me and i was not myself anymore i used to think that im satarting to fall for u bt now i know it was just the happiness,newness of our bond that u shown on 2 piece of paper😭 idk u know or not bt ive pasted those papers in my study board like a very deep memory that much deeper u touched me with those 2 pages of shayari and then u decided to take a break and our bond declination period started bt u know what thats the good part of our bond even if we talked in  2 to 3 weeks there was the same energy while talking so thank u for being my friend,my bestfriend and also my swami😂.   So study very hard and make me proud by clearing the neet exam bt u know ill say one thing i dont know whats written in our fate bt know one thing that u will become a very successful man one day because i see your passion .....</p>
+      </div>
+
+  <div id="improvements">
+        <div class="improveItem" data-index="0" style="display:block;padding:10px;border-radius:8px;background:rgba(255,255,255,0.02);margin-bottom:10px">
+          <p style="margin:0;color:rgba(255,255,255,0.95);">jada dusro ladkio ko na dekha kro😒</p>
+          <div style="margin-top:10px"><button class="agreeBtn" style="padding:8px 12px;border-radius:8px;border:none;background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#041024;cursor:pointer">I agree</button></div>
+        </div>
+
+        <div class="improveItem" data-index="1" style="display:none;padding:10px;border-radius:8px;background:rgba(255,255,255,0.02);margin-bottom:10px">
+          <p style="margin:0;color:rgba(255,255,255,0.95);">shambhavi ki agya ka palan kro 😉</p>
+          <div style="margin-top:10px"><button class="agreeBtn" style="padding:8px 12px;border-radius:8px;border:none;background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#041024;cursor:pointer">I agree</button></div>
+        </div>
+
+        <div class="improveItem" data-index="2" style="display:none;padding:10px;border-radius:8px;background:rgba(255,255,255,0.02);margin-bottom:10px">
+          <p style="margin:0;color:rgba(255,255,255,0.95);">kbhi to yaad krlia kro yarrr😭</p>
+          <div style="margin-top:10px"><button class="agreeBtn" style="padding:8px 12px;border-radius:8px;border:none;background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#041024;cursor:pointer">I agree</button></div>
+        </div>
+
+        <div class="improveItem" data-index="3" style="display:none;padding:10px;border-radius:8px;background:rgba(255,255,255,0.02);margin-bottom:10px">
+          <p style="margin:0;color:rgba(255,255,255,0.95);">jada mood na kharab kiya kro uska 😒 especially uske samne dusri ldki ki tareef to kra hi na kro🙁</p>
+          <div style="margin-top:10px"><button class="agreeBtn" style="padding:8px 12px;border-radius:8px;border:none;background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#041024;cursor:pointer">I agree</button></div>
+        </div>
+
+        <div id="improveDone" style="display:none;margin-top:8px;color:var(--muted);font-weight:700">good boy🤫🫶🏻</div>
+      </div>
+      
+      <div id="guess">
+        <div class="guessItem" data-index="0" style="padding:10px;border-radius:8px;background:rgba(255,255,255,0.02);margin-bottom:10px">
+          <div style="margin-top:4px"><button data-idx="0" class="guessBtn" style="padding:10px 14px;border-radius:10px;border:none;background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#041024;cursor:pointer">Tap to reveal a secret about her</button></div>
+        </div>
+
+        <div class="guessItem" data-index="1" style="padding:10px;border-radius:8px;background:rgba(255,255,255,0.02);margin-bottom:10px">
+          <div style="margin-top:4px"><button data-idx="1" class="guessBtn" style="padding:10px 14px;border-radius:10px;border:none;background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#041024;cursor:pointer">Tap to reveal a change you brought in her</button></div>
+        </div>
+
+        <div class="guessItem" data-index="2" style="padding:10px;border-radius:8px;background:rgba(255,255,255,0.02);margin-bottom:10px">
+          <div style="margin-top:4px"><button data-idx="2" class="guessBtn" style="padding:10px 14px;border-radius:10px;border:none;background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#041024;cursor:pointer">Tap to reveal a compliment</button></div>
+        </div>
+
+        <div class="guessItem" data-index="3" style="padding:10px;border-radius:8px;background:rgba(255,255,255,0.02);margin-bottom:10px">
+          <div style="margin-top:4px"><button data-idx="3" class="guessBtn" style="padding:10px 14px;border-radius:10px;border:none;background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#041024;cursor:pointer">Guess what</button></div>
+        </div>
+
+        <div class="guessItem" data-index="4" style="padding:10px;border-radius:8px;background:rgba(255,255,255,0.02);margin-bottom:10px">
+          <div style="margin-top:4px"><button data-idx="4" class="guessBtn" style="padding:10px 14px;border-radius:10px;border:none;background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#041024;cursor:pointer">Tap to reveal</button></div>
+        </div>
+      </div>
+      <div id="gallery" class="gallery">
+        <img src="images/dashboard_bg.jpg" alt="bg" />
+        <img src="images/front_bg.jpg" alt="front" />
+        <img src="images/children_bg.jpg" alt="children" />
+        <img src="images/gallery_00_11_52.jpeg" alt="gallery-00-11-52" />
+        <img src="images/gallery_01.jpeg" alt="gallery-01" />
+        <img src="images/gallery_02.jpeg" alt="gallery-02" />
+        <img src="images/gallery_03.jpeg" alt="gallery-03" />
+        <img src="images/gallery_04.jpeg" alt="gallery-04" />
+        <img src="images/gallery_05.jpeg" alt="gallery-05" />
+        <img src="images/gallery_06.jpeg" alt="gallery-06" />
+        <img src="images/gallery_07.jpeg" alt="gallery-07" />
+        <img src="images/gallery_08.jpeg" alt="gallery-08" />
+        <img src="images/gallery_09.jpeg" alt="gallery-09" />
+        <img src="images/gallery_10.jpeg" alt="gallery-10" />
+        <img src="images/gallery_11.jpeg" alt="gallery-11" />
+      </div>
+      
+    </div>
+  </div>
+  <img id="bgImg" src="images/gallery_07.jpeg" alt="background" />
+  <div class="dreamy-overlay"></div>
+  <div class="bgOverlay"></div>
+
+  <!-- Birthday modal -->
+  <!-- Top-left birthday dialog (small) -->
+  <div id="bdayModal" style="position:fixed;top:20px;left:20px;z-index:1200;">
+    <div style="background:#fff;padding:14px;border-radius:10px;width:320px;color:#111;box-shadow:0 8px 30px rgba(0,0,0,0.35);">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+        <div>
+          <h3 style="margin:0;font-size:1.05rem">Happy Birthday 🎉</h3>
+          <div style="font-size:0.9rem;color:#444;margin-top:6px">Wishing you a very happy birthday — open your gift below!</div>
+        </div>
+        <button id="closeBday" title="Close" style="background:transparent;border:none;font-size:1.1rem;cursor:pointer">✕</button>
+      </div>
+
+      <div style="display:flex;gap:8px;justify-content:flex-start;margin-top:12px">
+        <button id="playBday" style="padding:8px 12px;border-radius:8px;border:none;background:#0ea5e9;color:#fff">Play</button>
+        <button id="pauseBday" style="padding:8px 12px;border-radius:8px;border:1px solid #ccc;background:#fff;color:#333">Pause</button>
+        <button id="stopBday" style="padding:8px 12px;border-radius:8px;border:1px solid #ccc;background:#fff;color:#333">Stop</button>
+        <button id="hideBday" style="padding:8px 10px;border-radius:8px;border:1px solid #eee;background:#fafafa;color:#666;margin-left:auto">Hide</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Small control when modal is hidden: appears at top-left -->
+  <div id="miniControls" style="position:fixed;top:20px;left:20px;z-index:1150;display:none">
+    <div style="background:rgba(255,255,255,0.95);padding:8px;border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,0.2);display:flex;gap:6px;align-items:center">
+      <button id="miniPlay" title="Play" style="padding:6px 8px;border-radius:6px;border:none;background:#0ea5e9;color:#fff">▶</button>
+      <button id="miniPause" title="Pause" style="padding:6px 8px;border-radius:6px;border:1px solid #ddd;background:#fff;color:#333">❚❚</button>
+      <button id="miniStop" title="Stop" style="padding:6px 8px;border-radius:6px;border:1px solid #ddd;background:#fff;color:#333">■</button>
+      <button id="openBday" title="Open" style="padding:6px 8px;border-radius:6px;border:1px solid #eee;background:#fff;color:#666">Open</button>
+    </div>
+  </div>
+
+  <button id="enableSound" style="position:fixed;top:20px;right:20px;z-index:1250;display:none;padding:8px 10px;border-radius:8px;border:none;background:#10b981;color:#fff;box-shadow:0 6px 18px rgba(0,0,0,0.2);">Enable sound</button>
+
+    <!-- Lightbox for gallery images -->
+    <div id="lightbox" role="dialog" aria-hidden="true">
+      <button class="lightbox-side left" id="lbPrev"><span class="lb-side-btn">◀</span></button>
+      <img id="lbImage" src="" alt="" />
+      <button class="lightbox-side right" id="lbNext"><span class="lb-side-btn">▶</span></button>
+
+      <div class="lightbox-controls">
+        <button id="lbClose">Close</button>
+        <button id="lbFull">Full screen</button>
+      </div>
+    </div>
+
+  <script>
+    (function(){
+      function q(name){
+        const params = new URLSearchParams(location.search);
+        return params.get(name) || '';
+      }
+      const name = q('name') || 'Mrityunjay';
+      const title = document.getElementById('title');
+      const msg = document.getElementById('message');
+
+      title.textContent = 'Welcome ' + name + '!!';
+      // Wishes array (original message + the additional wishes the user provided)
+      const wishes = [
+        `Wish you a very happy birthday..... thought to make your birthday special so here i am writing this code ofcourse with the help of copilot to make you feel special😉 hope i am somewhat successful in doing that 🎂🎉`,
+        `Happy Birthday to the person who has turned even my dullest days into something warm and meaningful.
+Your kindness, your passion, your energy — everything about you inspires me.
+Thank you for every compliment, every moment of support, every little thing you’ve done without even realizing how much it mattered.
+You deserve all the happiness you bring into everyone else’s life.💛✨`,
+        `Some people walk into your life and suddenly everything feels easier, lighter, and more hopeful — you are that person for me.
+Your kindness isn’t loud, but it’s powerful.
+Your passion is inspiring.
+Your words lift me even when you don’t know I need it.
+Happy Birthday to someone who makes every day warmer than the last.
+You’re truly one of a kind. ❤️`,
+        `happy birthday to my swami thank you for keeping my playful nature intact and dealing with it..thank u mere baccho ko akele palne ke liye😭 and also jada tension lene se kuch nhi hota h the way u are passionate about your career you will make it one day so no jada tension`,
+        `thoda na apne hormones control me rkha kro😏 jada dusri ldkia dekhne ki jrurt nhi h ek ladki yha raat jaagke website bna rhi aur ye mahashay pta nhi kis ke bare me sochte h so thoda hme bhi yaad krliya kroo😭`
+      ];
+
+      let currentWish = 0;
+      function showWish(idx){
+        currentWish = ((idx % wishes.length) + wishes.length) % wishes.length;
+        msg.textContent = wishes[currentWish];
+      }
+      // show initial wish
+      showWish(0);
+
+      // Shayari carousel (two shayaris provided by user)
+      const shayaris = [
+        `Jo ring mein ladkar muskuraaye, woh uski pehchaan hai,
+Har punch mein jazbaat, har move mein ek shaan hai.
+Ladkiyon se baat kare toh alfaaz bhi rang laate hain,
+Flirting ho ya baatein—dono hi dil chura jaate hain.
+
+Uski baton mein itna sach, ki sab bharosa kar hi lete hain,
+Uski mehnat mein itni lagan, ki sapne bhi darr ke tale rehte hain.
+Emotional ho ya mental fight, dono mein woh jeetna chahta hai,
+Woh banda bas best nahi… ek alag hi level ka lagta hai.`,
+
+        `Duniya ke liye khud ko itna khol kar rakh deta hai,
+Log kya kahenge—yeh soch kar kabhi rukta hi nahi rehta hai.
+Online toh poora bold, poora open, ekdum full-tashan ka class,
+Par real life mein halka sa introvert—thoda silent, thoda soft-mass.
+
+Chahe sirf 6 mahine hi hue hon, par baatein aaj bhi nayi lagti hain,
+Na mil paaye hoon kabhi saamne, phir bhi ek ajeeb si parchhai lagti hain.
+Aur uski tasveerein… haaye re, kya hi bolu main,
+Har spicy pic dekh ke chatpati aurat andar se ‘HELLO JI’ bol uthe—yeh uski hi toh karni hai bhai.
+
+Woh jaisa hai, waisa hi rahe—isse zyada perfect form koi kya banaye,
+Na mask, na dikhawa, asli wala banda—yeh baat hi usse sabse pyaara banaye.
+Apne tareeke se jeeta hai, apni vibe pe tikta hai,
+Aur shayad isi liye… duniya bhar mein woh bilkul alag dikhta hai.`
+      ];
+
+      let currentShay = 0;
+      function showShayari(i){
+        currentShay = ((i % shayaris.length) + shayaris.length) % shayaris.length;
+        const el = document.getElementById('shayariText');
+        if(el) el.innerHTML = `<pre style='background:transparent;border:none;color:inherit;font-family:inherit;font-size:1.05rem;white-space:pre-wrap;margin:0;padding:0;'>${shayaris[currentShay]}</pre>`;
+      }
+      // show first shayari
+      showShayari(0);
+      const nextShayBtn = document.getElementById('nextShayari');
+      if(nextShayBtn) nextShayBtn.addEventListener('click', ()=> showShayari(currentShay + 1));
+
+      // set a friendly date/time subtitle
+      try{ document.getElementById('dateNow').textContent = new Date().toLocaleString(); }catch(e){}
+
+      // TAB handling
+      const tabs = document.querySelectorAll('.tab');
+      const panels = document.querySelectorAll('.content-area > div');
+      function setActive(tabName){
+        tabs.forEach(t=> t.classList.toggle('active', t.dataset.tab === tabName));
+        panels.forEach(p=> p.classList.toggle('active', p.id === tabName));
+      }
+  tabs.forEach(t=> t.addEventListener('click', ()=> { setActive(t.dataset.tab); try{ t.classList.add('dance'); setTimeout(()=> t.classList.remove('dance'), 900); }catch(e){} }));
+
+      // Render a single-month calendar and support prev/next navigation
+      function renderMonthCalendar(containerId, year, month, highlightMonth, highlightDay, label){
+        const container = document.getElementById(containerId);
+        if(!container) return;
+        container.innerHTML = '';
+        const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+        const title = document.createElement('h4'); title.textContent = monthNames[month] + ' ' + year; container.appendChild(title);
+        const days = document.createElement('div'); days.className = 'days';
+
+        // day-of-week headers
+        const dow = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+        for(let h=0;h<7;h++){ const dh = document.createElement('div'); dh.className='day'; dh.style.fontWeight='600'; dh.style.opacity='0.9'; dh.textContent = dow[h]; days.appendChild(dh); }
+
+        const first = new Date(year, month, 1).getDay();
+        const len = new Date(year, month+1, 0).getDate();
+
+        // empty slots
+        for(let e=0;e<first;e++){ const ed = document.createElement('div'); ed.className='day empty'; ed.textContent=''; days.appendChild(ed); }
+
+        for(let d=1; d<=len; d++){
+          const dd = document.createElement('div'); dd.className='day'; dd.textContent = d;
+          if(month === highlightMonth && d === highlightDay){ dd.classList.add('highlight'); dd.title = label; dd.addEventListener('click', ()=> openDreamModal("Mrityunjay's day🫶🏻")); }
+          days.appendChild(dd);
+        }
+
+        container.appendChild(days);
+      }
+
+      // Month navigation state — default to November
+      (function(){
+        const now = new Date();
+        const year = now.getFullYear();
+        let currentMonth = 10; // November (0-based index)
+        const highlightM = 10, highlightD = 23, highlightLabel = "Mrityunjay's birthday";
+
+        const monthTitle = document.getElementById('monthTitle');
+        const calContainer = document.getElementById('monthCal');
+        function render(){
+          try{ monthTitle.textContent = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][currentMonth] + ' ' + year; }catch(e){}
+          renderMonthCalendar('monthCal', year, currentMonth, highlightM, highlightD, highlightLabel);
+        }
+
+        document.getElementById('calPrev').addEventListener('click', ()=>{ currentMonth = (currentMonth + 11) % 12; render(); });
+        document.getElementById('calNext').addEventListener('click', ()=>{ currentMonth = (currentMonth + 1) % 12; render(); });
+        render();
+      })();
+
+      // Next wish button
+      const nextBtn = document.getElementById('nextWish');
+      if(nextBtn){ nextBtn.addEventListener('click', ()=> { showWish(currentWish + 1); }); }
+
+      // Elements
+      const modal = document.getElementById('bdayModal');
+      const playBtn = document.getElementById('playBday');
+      const pauseBtn = document.getElementById('pauseBday');
+      const stopBtn = document.getElementById('stopBday');
+      const closeBtn = document.getElementById('closeBday');
+      const hideBtn = document.getElementById('hideBday');
+
+      const mini = document.getElementById('miniControls');
+      const miniPlay = document.getElementById('miniPlay');
+      const miniPause = document.getElementById('miniPause');
+      const miniStop = document.getElementById('miniStop');
+      const openBday = document.getElementById('openBday');
+
+      // Notes for Happy Birthday (frequency in Hz and duration in ms)
+      const NOTES = [
+        {f:392,d:400}, {f:392,d:400}, {f:440,d:800}, {f:392,d:800}, {f:523.25,d:800}, {f:493.88,d:1200},
+        {f:392,d:400}, {f:392,d:400}, {f:440,d:800}, {f:392,d:800}, {f:587.33,d:800}, {f:523.25,d:1200},
+        {f:392,d:400}, {f:392,d:400}, {f:783.99,d:800}, {f:659.25,d:800}, {f:523.25,d:800}, {f:493.88,d:800}, {f:440,d:1200},
+        {f:349.23,d:400}, {f:349.23,d:400}, {f:329.63,d:800}, {f:523.25,d:800}, {f:587.33,d:800}, {f:523.25,d:1200}
+      ];
+
+      // Audio controller supporting play / pause / stop / resume
+      function createAudioController(){
+        let ctx = null;
+        let isPlaying = false;
+        let isPaused = false;
+        let currentIndex = 0; // next note to play
+        let timeouts = [];
+        let activeOsc = null;
+        let activeGain = null;
+
+        function ensureCtx(){ if(!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)(); return ctx; }
+
+        function clearTimers(){ timeouts.forEach(id => clearTimeout(id)); timeouts = []; }
+
+        function stopActiveOsc(){ try{ if(activeOsc){ try{ activeOsc.stop(); }catch(e){} activeOsc.disconnect(); activeOsc = null; } if(activeGain){ activeGain.disconnect(); activeGain = null; } }catch(e){}
+        }
+
+        function scheduleFrom(idx){
+          const c = ensureCtx();
+          let offset = 0;
+            // play music only, do not start confetti here
+            for(let i = idx; i < NOTES.length; i++){
+            const note = NOTES[i];
+            const startId = setTimeout(()=>{
+              // create oscillator & gain and play for note.d
+              const o = c.createOscillator();
+              const g = c.createGain();
+              o.type = 'sine';
+              o.frequency.setValueAtTime(note.f, c.currentTime);
+              g.gain.setValueAtTime(0, c.currentTime);
+              g.gain.linearRampToValueAtTime(0.18, c.currentTime + 0.01);
+              g.gain.linearRampToValueAtTime(0.0, c.currentTime + note.d/1000 - 0.02);
+              o.connect(g); g.connect(c.destination);
+              try{ o.start(); }catch(e){}
+              activeOsc = o; activeGain = g;
+              // stop after duration
+              const stopId = setTimeout(()=>{
+                try{ o.stop(); }catch(e){}
+                try{ o.disconnect(); g.disconnect(); }catch(e){}
+                if(currentIndex <= i) currentIndex = i + 1;
+                activeOsc = null; activeGain = null;
+              }, note.d);
+              timeouts.push(stopId);
+            }, offset);
+            timeouts.push(startId);
+            offset += note.d;
+          }
+
+          // schedule finish: reset flags when done
+          const finishId = setTimeout(()=>{
+            isPlaying = false; isPaused = false; currentIndex = 0; timeouts = []; 
+          }, offset + 60);
+          timeouts.push(finishId);
+        }
+
+        return {
+          play(){
+            if(isPlaying && !isPaused) return; // already playing
+            isPaused = false;
+            isPlaying = true;
+            // resume audio context if needed
+            try{ const c = ensureCtx(); if(c.state === 'suspended') c.resume(); }catch(e){}
+            scheduleFrom(currentIndex);
+          },
+          pause(){
+            if(!isPlaying || isPaused) return;
+            isPaused = true;
+            // stop future scheduled notes, stop currently playing oscillator
+            clearTimers();
+            stopActiveOsc();
+          },
+          stop(){
+            if(!isPlaying && !isPaused) return;
+            isPaused = false; isPlaying = false; currentIndex = 0;
+            clearTimers(); stopActiveOsc();
+          },
+          isPlaying(){ return isPlaying; },
+          isPaused(){ return isPaused; }
+        };
+      }
+
+      const player = createAudioController();
+
+      // Confetti (configurable count/duration). Pass {big:true} for a larger burst.
+      function startConfetti(opts){
+        opts = opts || {};
+        const count = opts.big ? 320 : 140;
+        const duration = opts.big ? 8000 : 6000;
+        const canvas = document.createElement('canvas');
+        canvas.style.position = 'fixed'; canvas.style.left = 0; canvas.style.top = 0; canvas.style.width = '100%'; canvas.style.height = '100%';
+        canvas.style.zIndex = 2500; canvas.style.pointerEvents = 'none';
+        document.body.appendChild(canvas);
+        const ctx = canvas.getContext('2d');
+        function resize(){ canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        resize(); window.addEventListener('resize', resize);
+
+        const colors = ['#ff7ab6','#ffd166','#ffd6a5','#a0f0d1','#96bbff','#caa1ff','#ffb3c6'];
+        const pieces = [];
+        for(let i=0;i<count;i++){
+          pieces.push({ x: Math.random()*canvas.width, y: Math.random()*-canvas.height, vx:(Math.random()-0.5)*8, vy:Math.random()*7+2, col: colors[Math.floor(Math.random()*colors.length)], r: Math.random()*8+4, rot: Math.random()*360, vr:(Math.random()-0.5)*12 });
+        }
+
+        let start = null;
+        function step(ts){
+          if(!start) start = ts;
+          const elapsed = ts - start;
+          ctx.clearRect(0,0,canvas.width,canvas.height);
+          for(const p of pieces){
+            p.x += p.vx; p.y += p.vy; p.vy += 0.12; p.rot += p.vr*0.01;
+            ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot);
+            ctx.fillStyle = p.col; ctx.fillRect(-p.r/2,-p.r/2,p.r,p.r*0.6);
+            ctx.restore();
+          }
+          if(elapsed < duration) requestAnimationFrame(step); else { try{ document.body.removeChild(canvas); }catch(e){} window.removeEventListener('resize', resize); }
+        }
+        requestAnimationFrame(step);
+      }
+
+      // Wire UI
+      playBtn.addEventListener('click', function(){ player.play(); });
+      pauseBtn.addEventListener('click', function(){ player.pause(); });
+      stopBtn.addEventListener('click', function(){ player.stop(); });
+
+      closeBtn.addEventListener('click', function(){ modal.style.display = 'none'; mini.style.display = 'block'; });
+      hideBtn.addEventListener('click', function(){ modal.style.display = 'none'; mini.style.display = 'block'; });
+
+      miniPlay.addEventListener('click', function(){ player.play(); });
+      miniPause.addEventListener('click', function(){ player.pause(); });
+      miniStop.addEventListener('click', function(){ player.stop(); });
+      openBday.addEventListener('click', function(){ modal.style.display = 'block'; mini.style.display = 'none'; });
+
+      // Try a gentle autoplay attempt on load; if blocked, show a visible "Enable sound" button
+      const enableBtn = document.getElementById('enableSound');
+      window.addEventListener('load', function(){
+        setTimeout(()=>{
+          try{ startConfetti(); }catch(e){}
+        }, 400);
+      });
+      if(enableBtn){
+        enableBtn.addEventListener('click', function(){
+          try{ const c = (window.AudioContext || window.webkitAudioContext) && (new (window.AudioContext || window.webkitAudioContext)()); if(c && c.state === 'suspended') c.resume(); }catch(e){}
+          enableBtn.style.display = 'none';
+        });
+      }
+
+      // Generic dreamy modal used for calendar and other messages
+      function openDreamModal(text){
+        try{
+          const modal = document.createElement('div');
+          modal.style.position = 'fixed'; modal.style.inset = 0; modal.style.display = 'flex'; modal.style.alignItems = 'center'; modal.style.justifyContent = 'center';
+          modal.style.background = 'rgba(2,6,23,0.6)'; modal.style.zIndex = 2600;
+
+          const card = document.createElement('div');
+          card.style.maxWidth = '680px'; card.style.width = '92%'; card.style.padding = '18px'; card.style.borderRadius = '12px';
+          card.style.background = 'linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02))';
+          card.style.boxShadow = '0 20px 60px rgba(0,0,0,0.6)'; card.style.color = '#fff';
+
+          const txt = document.createElement('div'); txt.style.fontSize = '1.05rem'; txt.style.lineHeight = '1.4'; txt.style.whiteSpace = 'pre-wrap'; txt.textContent = text;
+          const ctl = document.createElement('div'); ctl.style.display='flex'; ctl.style.justifyContent='flex-end'; ctl.style.marginTop='12px'; ctl.style.gap='8px';
+          const close = document.createElement('button'); close.textContent = 'Close'; close.style.padding='8px 12px'; close.style.borderRadius='8px'; close.style.border='none'; close.style.cursor='pointer'; close.style.background='linear-gradient(90deg,var(--accent),var(--accent-2))'; close.style.color='#041024';
+
+          ctl.appendChild(close); card.appendChild(txt); card.appendChild(ctl); modal.appendChild(card); document.body.appendChild(modal);
+
+          function cleanup(){ try{ if(modal && modal.parentNode) modal.parentNode.removeChild(modal); }catch(e){} }
+          close.addEventListener('click', cleanup);
+          // close on overlay click outside card
+          modal.addEventListener('click', function(ev){ if(ev.target === modal) cleanup(); });
+        }catch(e){}
+      }
+
+      // Gallery / lightbox behavior
+      (function(){
+        const thumbs = Array.from(document.querySelectorAll('.gallery img'));
+        if(thumbs.length === 0) return;
+        const srcs = thumbs.map(img=> img.getAttribute('src'));
+        const lb = document.getElementById('lightbox');
+        const lbImg = document.getElementById('lbImage');
+        const lbPrev = document.getElementById('lbPrev');
+        const lbNext = document.getElementById('lbNext');
+        const lbClose = document.getElementById('lbClose');
+        const lbFull = document.getElementById('lbFull');
+        let idx = 0;
+
+        function showIndex(i){ idx = ((i % srcs.length) + srcs.length) % srcs.length; lbImg.src = srcs[idx]; lb.setAttribute('aria-hidden','false'); lb.classList.add('active'); }
+        function closeLB(){ lb.classList.remove('active'); lb.setAttribute('aria-hidden','true'); try{ if(document.fullscreenElement) document.exitFullscreen(); }catch(e){} }
+        function next(){ showIndex(idx + 1); }
+        function prev(){ showIndex(idx - 1); }
+
+        thumbs.forEach((t,i)=> t.addEventListener('click', (e)=>{ e.preventDefault(); showIndex(i); try{ lb.requestFullscreen && lb.requestFullscreen(); }catch(err){} }));
+        lbNext.addEventListener('click', next);
+        lbPrev.addEventListener('click', prev);
+        lbClose.addEventListener('click', closeLB);
+        lbFull.addEventListener('click', function(){ try{ if(!document.fullscreenElement) lb.requestFullscreen(); else document.exitFullscreen(); }catch(e){} });
+
+        // keyboard navigation
+        document.addEventListener('keydown', function(ev){ if(!lb.classList.contains('active')) return; if(ev.key === 'ArrowRight'){ next(); ev.preventDefault(); } else if(ev.key === 'ArrowLeft'){ prev(); ev.preventDefault(); } else if(ev.key === 'Escape'){ closeLB(); } });
+      })();
+
+    })();
+      
+      // create denser dream sparkles
+      (function createSparkles(){
+        try{
+          const count = 36;
+          for(let i=0;i<count;i++){
+            const s = document.createElement('div');
+            s.className = 'sparkle';
+            // random positions across the viewport
+            s.style.left = (Math.random()*100) + '%';
+            s.style.top = (Math.random()*100) + '%';
+            const size = 3 + Math.floor(Math.random()*18);
+            s.style.width = size + 'px'; s.style.height = size + 'px';
+            const hue = 280 + Math.floor(Math.random()*120); // pink-blue-cyan range
+            s.style.background = `radial-gradient(circle at 30% 30%, rgba(255,255,255,0.95), hsla(${hue},90%,65%,0.85) 40%, transparent 60%)`;
+            s.style.opacity = (Math.random()*0.8 + 0.2).toFixed(2);
+            const delay = Math.random()*4;
+            const dur = 3 + Math.random()*3;
+            s.style.animation = `sparkleAnim ${dur}s ${delay}s infinite`;
+            document.body.appendChild(s);
+          }
+        }catch(e){}
+      })();
+
+      // Improvements: sequential messages with 'I agree' buttons; show one at a time
+      (function improvementsSequence(){
+        try{
+          const container = document.getElementById('improvements');
+          if(!container) return;
+          const items = Array.from(container.querySelectorAll('.improveItem'));
+          const done = document.getElementById('improveDone');
+          if(items.length === 0) return;
+
+          function showIndex(i){
+            items.forEach((el,idx)=> el.style.display = (idx===i) ? 'block' : 'none');
+            if(i >= items.length){
+              if(done) done.style.display = 'block';
+            } else {
+              if(done) done.style.display = 'none';
+            }
+          }
+
+          // wire buttons
+          const btns = Array.from(container.querySelectorAll('.agreeBtn'));
+          btns.forEach((b, idx)=>{
+            b.addEventListener('click', function(){
+              try{ b.classList.add('dance'); setTimeout(()=> b.classList.remove('dance'), 900); }catch(e){}
+              // on last click show final message, then reset to start (circular)
+              if(idx === items.length - 1){
+                // hide all items and show done
+                items.forEach(el=> el.style.display = 'none');
+                if(done) done.style.display = 'block';
+                try{ done.classList.add('flash'); setTimeout(()=> done.classList.remove('flash'), 1400); }catch(e){}
+                // after a short pause, reset to first item
+                setTimeout(()=>{
+                  if(done) done.style.display = 'none';
+                  showIndex(0);
+                }, 1400);
+              } else {
+                showIndex(idx+1);
+              }
+            });
+          });
+
+          // start at 0
+          showIndex(0);
+        }catch(e){}
+      })();
+
+      // Guess What: each option is visible; tapping reveals its secret in-place
+      (function guessSequence(){
+        try{
+          const container = document.getElementById('guess');
+          if(!container) return;
+          const items = Array.from(container.querySelectorAll('.guessItem'));
+          if(items.length === 0) return;
+
+          const messages = [
+            `your shubh prabhat made me wake up for so may days and my day goes well when i wake up by seein your text same goes with those shubh ratri text`,
+            `she was always awkward saying some words in hindi bt u made her do it just because she thought u would be happy if she replied in hindi`,
+            `you are the best man she met online`,
+            `you are the reason she smile randomly`,
+            `youre doing better than you feel`
+          ];
+
+          const btns = Array.from(container.querySelectorAll('.guessBtn'));
+          // initialize visibility: only first option visible
+          items.forEach((el, i) => { el.style.display = (i === 0) ? 'block' : 'none'; });
+          // modal overlay for single-window reveals
+          let guessModal = null;
+          function openGuessModal(idx){
+            if(guessModal) return; // already open
+            // mark item revealed and hide its button
+            const item = items[idx];
+            if(!item) return;
+            const btn = item.querySelector('.guessBtn');
+            if(btn) btn.style.display = 'none';
+            item.setAttribute('data-revealed','1');
+
+            // create overlay
+            guessModal = document.createElement('div');
+            guessModal.style.position = 'fixed';
+            guessModal.style.inset = 0;
+            guessModal.style.display = 'flex';
+            guessModal.style.alignItems = 'center';
+            guessModal.style.justifyContent = 'center';
+            guessModal.style.background = 'rgba(2,6,23,0.6)';
+            guessModal.style.zIndex = 2200;
+
+            const card = document.createElement('div');
+            card.style.background = 'linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02))';
+            card.style.padding = '18px';
+            card.style.borderRadius = '12px';
+            card.style.maxWidth = '680px';
+            card.style.width = '90%';
+            card.style.color = '#fff';
+            card.style.boxShadow = '0 20px 60px rgba(0,0,0,0.6)';
+
+            const txt = document.createElement('div');
+            txt.style.fontSize = '1rem';
+            txt.style.lineHeight = '1.5';
+            txt.style.whiteSpace = 'pre-wrap';
+            txt.textContent = messages[idx] || '';
+
+            const ctl = document.createElement('div');
+            ctl.style.display = 'flex';
+            ctl.style.justifyContent = 'flex-end';
+            ctl.style.gap = '8px';
+            ctl.style.marginTop = '12px';
+
+            const close = document.createElement('button');
+            close.textContent = 'Close';
+            close.style.padding = '8px 12px';
+            close.style.borderRadius = '8px';
+            close.style.border = '1px solid rgba(255,255,255,0.12)';
+            close.style.background = 'transparent';
+            close.style.color = '#fff';
+            close.style.cursor = 'pointer';
+
+            const nextBtn = document.createElement('button');
+            nextBtn.textContent = '>'; // show next
+            nextBtn.title = 'Next';
+            nextBtn.style.padding = '8px 12px';
+            nextBtn.style.borderRadius = '8px';
+            nextBtn.style.border = 'none';
+            nextBtn.style.background = 'linear-gradient(90deg,var(--accent),var(--accent-2))';
+            nextBtn.style.color = '#041024';
+            nextBtn.style.cursor = 'pointer';
+
+            ctl.appendChild(close);
+            ctl.appendChild(nextBtn);
+
+            card.appendChild(txt);
+            card.appendChild(ctl);
+            guessModal.appendChild(card);
+            document.body.appendChild(guessModal);
+
+            function cleanup(){
+              if(guessModal){ try{ document.body.removeChild(guessModal); }catch(e){} guessModal = null; }
+              // after closing, reveal next option (or reset if none left)
+              const nextIdx = idx + 1;
+              if(nextIdx < items.length){
+                items[nextIdx].style.display = 'block';
+              } else {
+                // all seen — reset sequence (circular): clear revealed flags and show first
+                items.forEach((it) => {
+                  it.removeAttribute('data-revealed');
+                  const b = it.querySelector('.guessBtn'); if(b) b.style.display = '';
+                  it.style.display = 'none';
+                });
+                if(items[0]) items[0].style.display = 'block';
+              }
+            }
+
+            close.addEventListener('click', function(){ cleanup(); });
+
+            // Next: close modal and reveal the next "Tap to reveal" option, but do NOT auto-open it.
+            nextBtn.addEventListener('click', function(){
+              // simply cleanup which will reveal the next option (or reset to first if none left)
+              cleanup();
+            });
+          }
+
+          btns.forEach((b) => {
+            b.addEventListener('click', function(){
+              try{ b.classList.add('dance'); setTimeout(()=> b.classList.remove('dance'), 900); }catch(e){}
+              const idx = parseInt(this.getAttribute('data-idx'), 10);
+              if(isNaN(idx)) return;
+              try{ openGuessModal(idx); }catch(e){}
+            });
+          });
+        }catch(e){}
+      })();
+  </script>
+</body>
+</html>
